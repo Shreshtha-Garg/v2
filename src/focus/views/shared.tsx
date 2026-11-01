@@ -1,13 +1,13 @@
 // Small pieces the zoomed views share: chips, ink buttons, stamps, photos that enlarge.
 import { AnimatePresence, m } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { ExternalLink, Fact, Shot } from '../../data/caseFile'
 
 export function Chips({ items }: { items: string[] }) {
   return (
-    <ul className="flex flex-wrap gap-1.5">
+    <ul className="flex flex-wrap gap-1">
       {items.map((item) => (
         <li key={item} className="chip">
           {item}
@@ -19,7 +19,7 @@ export function Chips({ items }: { items: string[] }) {
 
 export function Links({ links }: { links: ExternalLink[] }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {links.map((l) => (
         <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className="ink-btn">
           {l.label} ↗
@@ -31,10 +31,10 @@ export function Links({ links }: { links: ExternalLink[] }) {
 
 export function Bullets({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-2.5">
+    <ul className="space-y-1.5">
       {items.map((b) => (
-        <li key={b} className="flex gap-3 text-[16px] leading-relaxed text-ink">
-          <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-string" aria-hidden="true" />
+        <li key={b} className="flex gap-2.5 text-body leading-normal text-ink">
+          <span className="mt-[8px] h-1.5 w-1.5 shrink-0 rounded-full bg-string" aria-hidden="true" />
           {b}
         </li>
       ))}
@@ -59,11 +59,11 @@ export function FactBox({ facts, title = 'At a glance' }: { facts: Fact[]; title
   return (
     <div className="factbox">
       <p className="factbox-title">{title}</p>
-      <div className={`mt-3 grid gap-x-6 gap-y-4 ${facts.length > 3 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'}`}>
+      <div className={`mt-1.5 grid gap-x-4 gap-y-2 ${facts.length > 3 ? 'grid-cols-2 tab:grid-cols-4' : 'grid-cols-3'}`}>
         {facts.map((f) => (
           <div key={f.label}>
-            <p className="font-serif text-[30px] font-black leading-none text-ink">{f.value}</p>
-            <p className="mt-1.5 text-[13px] leading-snug text-ink-soft">{f.label}</p>
+            <p className="font-serif text-[22px] font-black leading-tight text-ink">{f.value}</p>
+            <p className="text-[12.5px] leading-snug text-ink-soft">{f.label}</p>
           </div>
         ))}
       </div>
@@ -85,8 +85,18 @@ export function PaperClip({ className = '' }: { className?: string }) {
   )
 }
 
+interface PhotoProps {
+  shot: Shot
+  /** Further screenshots, seen by paging through the enlarged view. */
+  more?: Shot[]
+  /** Crop to this aspect ratio, e.g. "16/9". The enlarged view always shows the whole image. */
+  aspect?: string
+  className?: string
+  showCaption?: boolean
+}
+
 /** A screenshot in a newspaper photo frame. Click to see it full size. */
-export function Photo({ shot, className = '', showCaption = true }: { shot: Shot; className?: string; showCaption?: boolean }) {
+export function Photo({ shot, more = [], aspect, className = '', showCaption = true }: PhotoProps) {
   const [open, setOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const close = () => {
@@ -99,7 +109,7 @@ export function Photo({ shot, className = '', showCaption = true }: { shot: Shot
       <button
         ref={buttonRef}
         type="button"
-        className="photo-frame block w-full cursor-zoom-in"
+        className="photo-frame relative block w-full cursor-zoom-in"
         onClick={() => setOpen(true)}
         aria-label={`Enlarge screenshot: ${shot.alt}`}
       >
@@ -109,28 +119,54 @@ export function Photo({ shot, className = '', showCaption = true }: { shot: Shot
           width={shot.width}
           height={shot.height}
           decoding="async"
-          className="block h-auto w-full"
+          className={`block h-auto w-full${aspect ? ' object-cover' : ''}`}
+          style={aspect ? { aspectRatio: aspect, objectPosition: shot.focus ?? '50% 0%' } : undefined}
         />
+        {more.length > 0 && (
+          <span className="absolute bottom-2 right-2 rounded-[3px] bg-ink/85 px-1.5 py-0.5 font-mono text-small text-paper">
+            +{more.length} more
+          </span>
+        )}
       </button>
-      {showCaption && <figcaption className="caption mt-2">{shot.caption}</figcaption>}
-      <Lightbox shot={shot} open={open} onClose={close} />
+      {showCaption && <figcaption className="caption mt-1.5">{shot.caption}</figcaption>}
+      <Lightbox shots={[shot, ...more]} open={open} onClose={close} />
     </figure>
   )
 }
 
-function Lightbox({ shot, open, onClose }: { shot: Shot; open: boolean; onClose: () => void }) {
+function Lightbox({ shots, open, onClose }: { shots: Shot[]; open: boolean; onClose: () => void }) {
+  const [index, setIndex] = useState(0)
+  const count = shots.length
+  const shot = shots[index]
+
+  useEffect(() => {
+    if (open) setIndex(0)
+  }, [open])
+
   useEffect(() => {
     if (!open) return
-    // Capture phase on window runs before the app's own Esc handler, so Esc closes only the photo.
+    // Capture phase on window runs before the app's own key handler, so while a photo is
+    // enlarged the keys act on the photo and never switch sections or close the panel.
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      e.preventDefault()
+      if (e.key === 'Tab') return
       e.stopPropagation()
-      onClose()
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      } else if (e.key === 'ArrowRight') {
+        setIndex((i) => (i + 1) % count)
+      } else if (e.key === 'ArrowLeft') {
+        setIndex((i) => (i - 1 + count) % count)
+      }
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
-  }, [open, onClose])
+  }, [open, onClose, count])
+
+  const page = (step: number) => (e: MouseEvent) => {
+    e.stopPropagation()
+    setIndex((i) => (i + step + count) % count)
+  }
 
   return createPortal(
     <AnimatePresence>
@@ -146,14 +182,27 @@ function Lightbox({ shot, open, onClose }: { shot: Shot; open: boolean; onClose:
           onClick={onClose}
         >
           <m.img
+            key={shot.src}
             src={shot.src}
             alt={shot.alt}
-            className="max-h-[80vh] max-w-full rounded-[2px] shadow-2xl"
-            initial={{ scale: 0.94 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.96 }}
+            className="max-h-[78vh] max-w-full rounded-[2px] shadow-2xl"
+            initial={{ scale: 0.96, opacity: 0.6 }}
+            animate={{ scale: 1, opacity: 1 }}
           />
-          <p className="mt-4 max-w-3xl text-center font-text text-[16px] italic text-wall">{shot.caption}</p>
+          <p className="mt-3 max-w-3xl text-center font-text text-body italic text-wall">{shot.caption}</p>
+          {count > 1 && (
+            <div className="mt-2 flex items-center gap-2 font-mono text-small text-wall">
+              <button type="button" className="hud-link" onClick={page(-1)} aria-label="Previous screenshot">
+                ←
+              </button>
+              <span>
+                {index + 1} / {count}
+              </span>
+              <button type="button" className="hud-link" onClick={page(1)} aria-label="Next screenshot">
+                →
+              </button>
+            </div>
+          )}
           <button type="button" autoFocus className="hud-link absolute right-5 top-5" onClick={onClose}>
             Close ✕
           </button>

@@ -30,7 +30,7 @@ function FormRow({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="tip-label mb-1.5 flex items-baseline gap-2">
+      <label htmlFor={htmlFor} className="tip-label mb-1 flex items-baseline gap-2">
         <span className="text-[#8c1c1c]">{n}</span>
         <span>{label}</span>
         {note && <span className="font-normal normal-case tracking-normal text-ink-soft">{note}</span>}
@@ -87,19 +87,19 @@ function TipForm() {
 
   if (status === 'sent') {
     return (
-      <div className="py-6" role="status">
+      <div className="py-3" role="status">
         <m.div
           initial={{ scale: 2.2, opacity: 0, rotate: -24 }}
           animate={{ scale: 1, opacity: 1, rotate: -8 }}
           transition={{ type: 'spring', stiffness: 420, damping: 18 }}
           className="inline-block"
         >
-          <Stamp className="text-[34px]">Tip received</Stamp>
+          <Stamp className="text-[26px]">Tip received</Stamp>
         </m.div>
-        <p className="mt-6 max-w-md font-text text-[18px] leading-relaxed text-ink">
+        <p className="mt-4 max-w-md font-text text-body leading-normal text-ink">
           Thanks. Your tip is on file, and I’ll reply to the email address you left.
         </p>
-        <button type="button" className="ink-btn mt-6" onClick={() => setStatus('idle')}>
+        <button type="button" className="ink-btn mt-4" onClick={() => setStatus('idle')}>
           Leave another tip
         </button>
       </div>
@@ -109,7 +109,8 @@ function TipForm() {
   const describedBy = (field: Field) => (errors[field] ? `tip-${field}-error` : undefined)
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-5">
+    <form onSubmit={submit} noValidate className="space-y-3">
+      <div className="grid gap-3 lg:grid-cols-2">
       <FormRow n="01" label="Your name" note="(optional)" htmlFor="tip-name">
         <input
           id="tip-name"
@@ -135,11 +136,12 @@ function TipForm() {
           aria-describedby={describedBy('email')}
         />
       </FormRow>
+      </div>
       <FormRow n="03" label="The tip" htmlFor="tip-message" error={errors.message} errorId="tip-message-error">
         <textarea
           id="tip-message"
           name="message"
-          rows={5}
+          rows={3}
           className="tip-input"
           placeholder="We’re hiring a backend engineer and liked ClickON."
           value={values.message}
@@ -158,7 +160,7 @@ function TipForm() {
         value={values.company}
         onChange={update('company')}
       />
-      <div className="flex flex-wrap items-center gap-4 border-t border-dashed border-ink/30 pt-5">
+      <div className="flex flex-wrap items-center gap-3 pt-0.5">
         <button type="submit" className="file-btn" disabled={status === 'sending'}>
           {status === 'sending' ? 'Filing…' : 'File the tip'}
           <span aria-hidden="true">→</span>
@@ -206,59 +208,59 @@ export function ContactView() {
   }
 
   return (
-    <div className="grid items-start gap-12 px-4 pb-12 pt-12 sm:px-8 md:px-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-      <section className="clipboard relative mx-auto w-full max-w-[600px] px-3 pb-4 pt-10 sm:px-4" aria-labelledby="tip-title">
+    <div className="grid flex-1 content-center items-start gap-8 px-4 pb-6 pt-7 tab:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] tab:gap-6 tab:px-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:px-10">
+      <section className="clipboard relative mx-auto w-full max-w-[600px] px-2.5 pb-2.5 pt-8 tab:px-3" aria-labelledby="tip-title">
         <span className="clipboard-clip" aria-hidden="true" />
-        <div className="form-sheet relative px-5 pb-7 pt-7 sm:px-8">
-          <div className="flex items-start justify-between gap-4 border-b-2 border-ink pb-3">
+        <div className="form-sheet relative px-4 pb-4 pt-4 lg:px-6">
+          <div className="flex items-start justify-between gap-4 border-b-2 border-ink pb-1.5">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c1c1c]">Tip line · Form TL-2027</p>
-              <h2 id="tip-title" className="mt-1 font-type text-[30px] leading-none text-ink sm:text-[34px]">
+              <p className="font-mono text-small font-bold uppercase tracking-[0.14em] text-[#8c1c1c]">Tip line · Form TL-2027</p>
+              <h2 id="tip-title" className="mt-0.5 font-type text-subhead leading-none text-ink">
                 Leave a tip
               </h2>
             </div>
-            <p className="hidden max-w-[150px] text-right font-mono text-[11px] uppercase leading-snug tracking-[0.14em] text-ink-soft sm:block">
+            <p className="hidden max-w-[130px] text-right font-mono text-small uppercase leading-snug tracking-[0.08em] text-ink-soft lg:block">
               Goes straight to my inbox
             </p>
           </div>
-          <p className="mt-4 font-hand text-[26px] leading-tight text-[#1f3f8a]">Got a lead, a role or a question? Write it here.</p>
-          <div className="mt-5">
+          <p className="mt-2 font-hand text-[22px] leading-tight text-[#1f3f8a]">Got a lead, a role or a question? Write it here.</p>
+          <div className="mt-2.5">
             <TipForm />
           </div>
         </div>
       </section>
 
-      <aside className="relative mx-auto w-full max-w-[420px] lg:mt-8">
-        <div className="paper-card relative rotate-[1.2deg] pb-6 pl-[56px] pr-6 pt-9 shadow-paper">
+      <aside className="relative mx-auto w-full max-w-[420px] tab:mt-2">
+        <div className="paper-card relative rotate-[1deg] pb-4 pl-[50px] pr-4 pt-7 shadow-paper">
           <span className="pin" style={{ left: '50%', top: 12 }} aria-hidden="true" />
           <p className="typed-label">Or reach me directly</p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <a
               href={`mailto:${PROFILE.email}`}
-              className="font-mono text-[15px] font-bold text-ink underline decoration-[#1f3f8a] decoration-2 underline-offset-4"
+              className="font-mono text-[13px] font-bold text-ink underline decoration-[#1f3f8a] decoration-2 underline-offset-4"
             >
               {PROFILE.email}
             </a>
-            <button type="button" onClick={copyEmail} className="ink-btn px-2.5 py-1 text-[11px]">
+            <button type="button" onClick={copyEmail} className="ink-btn px-2 py-0.5">
               {copied ? 'Copied' : 'Copy'}
             </button>
           </div>
-          <ul className="mt-5 divide-y divide-ink/15 border-y border-ink/15">
+          <ul className="mt-3 divide-y divide-ink/15 border-y border-ink/15">
             {CHANNELS.map((c) => (
               <li key={c.label}>
                 <a
                   href={c.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-baseline justify-between gap-4 py-2.5 text-ink hover:text-[#1f3f8a]"
+                  className="flex items-baseline justify-between gap-3 py-1.5 text-ink hover:text-[#1f3f8a]"
                 >
-                  <span className="font-mono text-[12px] font-bold uppercase tracking-[0.16em]">{c.label}</span>
-                  <span className="truncate font-type text-[14px]">{c.handle} ↗</span>
+                  <span className="font-mono text-small font-bold uppercase tracking-[0.08em]">{c.label}</span>
+                  <span className="truncate font-type text-[13px]">{c.handle} ↗</span>
                 </a>
               </li>
             ))}
           </ul>
-          <a href={PROFILE.resume} target="_blank" rel="noreferrer" className="ink-btn mt-5">
+          <a href={PROFILE.resume} target="_blank" rel="noreferrer" className="ink-btn mt-3">
             Resume PDF ↗
           </a>
         </div>

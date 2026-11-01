@@ -56,7 +56,11 @@ export function BoardItem({ id, label, box, lifted, dimmed, examined, onOpen, on
           scale it with the board, which blurs the text. */}
       <div className={`h-full w-full transition-opacity duration-200${dimmed ? ' opacity-45' : ''}`}>{children}</div>
       {examined && (
-        <span className="stamp stamp-sticker pointer-events-none absolute -right-6 -top-3 z-10 rotate-[12deg] text-[15px]">
+        <span
+          className="stamp stamp-sticker pointer-events-none absolute -right-2 -top-3 z-10 rotate-[12deg] text-[15px]"
+          // Research's top-right corner is bare cork, so its stamp goes on the front folder (204px tall) instead.
+          style={id === 'research' ? { top: box.h - 216 } : undefined}
+        >
           Examined
         </span>
       )}

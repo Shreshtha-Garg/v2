@@ -1,7 +1,6 @@
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Board } from './board/Board'
-import { ITEMS } from './board/layout'
 import { StackedBoard } from './board/StackedBoard'
 import { SECTIONS, neighbour, sectionById, sectionFromPath, sectionIndex } from './data/caseFile'
 import type { SectionId } from './data/caseFile'
@@ -12,7 +11,7 @@ import { BottomHud, TopHud } from './hud/Hud'
 import { Intro, markIntroSeen, shouldPlayIntro } from './intro/Intro'
 import { navigate, usePathname } from './lib/router'
 import { useExamined } from './lib/useExamined'
-import { fitStage, isStacked, useViewport } from './lib/useViewport'
+import { fitBoard, isStacked, useViewport } from './lib/useViewport'
 
 const HOME_TITLE = 'Shreshtha Garg · Full Stack Developer'
 
@@ -20,8 +19,8 @@ export default function App() {
   const pathname = usePathname()
   const active = sectionFromPath(pathname)
   const vp = useViewport()
-  const fit = fitStage(vp)
-  const stacked = isStacked(fit)
+  const fit = fitBoard(vp)
+  const stacked = isStacked(vp, fit)
   const examined = useExamined(active)
 
   const [intro, setIntro] = useState(() => shouldPlayIntro(pathname))
@@ -56,7 +55,7 @@ export default function App() {
   // On the board the geometry is known exactly; in the stacked layout the item is measured where it sits.
   const getItemPlacement = (id: SectionId): ItemPlacement | null => {
     if (!stacked) {
-      const b = ITEMS[id]
+      const b = fit.layout.items[id]
       const rect = { left: fit.left + b.x * fit.scale, top: fit.top + b.y * fit.scale, width: b.w * fit.scale, height: b.h * fit.scale }
       return { rect, rot: b.rot }
     }
@@ -155,7 +154,7 @@ export default function App() {
           />
           <TopHud examined={examined} compact={stacked} />
           {!stacked && <BottomHud active={active} />}
-          <HintToast ready={!intro} dismissed={active !== null} touch={stacked} />
+          <HintToast ready={!intro} dismissed={active !== null} touch={stacked || fit.layout.compact} aboveHud={!stacked} />
           <AnimatePresence>{intro && <Intro key="intro" onDone={endIntro} />}</AnimatePresence>
         </div>
       </MotionConfig>

@@ -16,11 +16,14 @@ interface Props {
   ready: boolean
   /** True once a section opens; the tip is no longer needed. */
   dismissed: boolean
+  /** Tablets and phones: no hovering, no number keys. */
   touch: boolean
+  /** Sit above the bottom bar when there is one. */
+  aboveHud: boolean
 }
 
 /** A one-time tip on how to use the board. Hides after a few seconds or as soon as a section opens. */
-export function HintToast({ ready, dismissed, touch }: Props) {
+export function HintToast({ ready, dismissed, touch, aboveHud }: Props) {
   const [visible, setVisible] = useState(() => !seenBefore())
 
   useEffect(() => {
@@ -48,7 +51,7 @@ export function HintToast({ ready, dismissed, touch }: Props) {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4 ${touch ? 'bottom-5' : 'bottom-[84px]'}`}
+      className={`pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4 ${aboveHud ? 'bottom-[60px]' : 'bottom-5'}`}
     >
       <AnimatePresence>
         {visible && ready && !dismissed && (

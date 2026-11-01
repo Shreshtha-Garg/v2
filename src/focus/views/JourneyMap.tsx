@@ -10,11 +10,12 @@ const RED = '#a8231c'
 
 /** Map coordinates (in the 1000×440 viewBox) and label placement for each stop. The years sit under the name. */
 const PLACES: Record<StopId, { x: number; y: number; label: string; labelY: number }> = {
-  jee: { x: 120, y: 262, label: 'JEE Advanced', labelY: 300 },
-  iiitm: { x: 340, y: 176, label: 'IIITM Gwalior', labelY: 110 },
-  firstbench: { x: 548, y: 262, label: 'Firstbench.ai', labelY: 300 },
-  hackon: { x: 742, y: 200, label: 'Amazon HackOn', labelY: 238 },
-  next: { x: 906, y: 318, label: 'Your team?', labelY: 360 },
+  jee: { x: 120, y: 262, label: 'JEE Advanced', labelY: 302 },
+  iiitm: { x: 340, y: 176, label: 'IIITM Gwalior', labelY: 106 },
+  firstbench: { x: 548, y: 262, label: 'Firstbench.ai', labelY: 302 },
+  // Named above its flag: below it, the trail on to the next stop would run through the label.
+  hackon: { x: 742, y: 236, label: 'Amazon HackOn', labelY: 168 },
+  next: { x: 906, y: 318, label: 'Your team?', labelY: 362 },
 }
 
 const TREES = [
@@ -101,7 +102,7 @@ export function JourneyMap({ selected, onSelect }: Props) {
         <path d="M70 110 q 7 -6 14 0 t 14 0" />
         <path d="M200 46 q 7 -6 14 0 t 14 0" />
       </g>
-      <Label x={128} y={86} size={18} color="#4d6b70" rotate={-8}>
+      <Label x={128} y={86} size={20} color="#4d6b70" rotate={-8}>
         Debugging Sea
       </Label>
       <path
@@ -129,7 +130,7 @@ export function JourneyMap({ selected, onSelect }: Props) {
           </g>
         ))}
       </g>
-      <Label x={735} y={34} size={18} color="#5b4426">
+      <Label x={735} y={36} size={20} color="#5b4426">
         Mount Expert
       </Label>
       <g>
@@ -141,7 +142,7 @@ export function JourneyMap({ selected, onSelect }: Props) {
           </g>
         ))}
       </g>
-      <Label x={312} y={384} size={16} color="#4f5a33">
+      <Label x={318} y={392} size={18} color="#4f5a33">
         Recursion Woods
       </Label>
 
@@ -161,10 +162,10 @@ export function JourneyMap({ selected, onSelect }: Props) {
       </Label>
 
       {/* Scale bar */}
-      <g transform="translate(430 414)" stroke={INK} strokeWidth="1.5">
+      <g transform="translate(480 414)" stroke={INK} strokeWidth="1.5">
         <path d="M0 0 H100 M0 -5 V5 M50 -4 V4 M100 -5 V5" />
       </g>
-      <Label x={480} y={404} size={13} color={INK}>
+      <Label x={530} y={404} size={15} color={INK}>
         about one year
       </Label>
 
@@ -231,15 +232,15 @@ export function JourneyMap({ selected, onSelect }: Props) {
                 <circle className="stop-ring" r="7" fill={on ? RED : '#f6eedb'} stroke={RED} strokeWidth="3" />
               )}
             </g>
-            <Label x={p.x} y={p.labelY} size={on ? 21 : 19} color={on ? RED : INK}>
+            <Label x={p.x} y={p.labelY} size={on ? 24 : 22} color={on ? RED : INK}>
               {p.label}
             </Label>
             {stop.years && (
               <text
                 x={p.x}
-                y={p.labelY + 19}
+                y={p.labelY + 20}
                 fill={on ? RED : '#6b4a24'}
-                fontSize="14"
+                fontSize="16"
                 textAnchor="middle"
                 style={{ fontFamily: 'var(--font-type)', letterSpacing: '0.06em' }}
               >

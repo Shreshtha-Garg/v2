@@ -7,7 +7,7 @@ import { PROFILE, SECTIONS, SKILLS, anchorSection } from '../data/caseFile'
 import type { Anchor, SectionId } from '../data/caseFile'
 import type { Viewport } from '../lib/useViewport'
 import { faceFor } from './faces'
-import { ITEMS } from './layout'
+import { WIDE } from './layout'
 
 /** Space on the left for the string. */
 const GUTTER = 40
@@ -33,7 +33,7 @@ export function StackedBoard({ vp, active, examined, onOpen }: Props) {
   const column = Math.min(vp.w - GUTTER - 28, 460)
   let y = 0
   const placed = SECTIONS.map((s, i) => {
-    const box = ITEMS[s.id]
+    const box = WIDE.items[s.id]
     const scale = Math.min(1, column / box.w)
     const item = { section: s, box, scale, top: y, w: box.w * scale, h: box.h * scale, rot: TILT[i % TILT.length] }
     y += item.h + GAP

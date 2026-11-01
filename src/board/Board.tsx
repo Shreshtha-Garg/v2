@@ -5,7 +5,6 @@ import type { Anchor, SectionId } from '../data/caseFile'
 import type { Fit } from '../lib/useViewport'
 import { BoardItem } from './BoardItem'
 import { faceFor } from './faces'
-import { ITEMS, STAGE } from './layout'
 import { SkillStrip } from './SkillStrip'
 import { Pins, Strings } from './Strings'
 
@@ -21,6 +20,7 @@ export function Board({ fit, active, examined, onOpen }: Props) {
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null)
   const [lockedSkill, setLockedSkill] = useState<string | null>(null)
   const activeSkill = hoveredSkill ?? lockedSkill
+  const { layout } = fit
 
   const hot = useMemo(
     () => new Set<Anchor>(SKILLS.find((s) => s.id === activeSkill)?.targets ?? []),
@@ -44,13 +44,13 @@ export function Board({ fit, active, examined, onOpen }: Props) {
         style={{
           left: fit.left,
           top: fit.top,
-          width: STAGE.w,
-          height: STAGE.h,
+          width: layout.stage.w,
+          height: layout.stage.h,
           transform: `scale(${fit.scale})`,
           transformOrigin: '0 0',
         }}
       >
-        <div className="board-frame absolute" style={{ inset: -26 }} aria-hidden="true" />
+        <div className="board-frame absolute" style={{ inset: -16 }} aria-hidden="true" />
         <div className="cork absolute inset-0" aria-hidden="true" />
 
         {SECTIONS.map((s) => {
@@ -60,26 +60,27 @@ export function Board({ fit, active, examined, onOpen }: Props) {
               key={s.id}
               id={s.id}
               label={s.label}
-              box={ITEMS[s.id]}
+              box={layout.items[s.id]}
               lifted={active === s.id}
               dimmed={activeSkill !== null && !hotSections.has(s.id)}
               examined={examined.has(s.id)}
               onOpen={onOpen}
               onHover={setHoveredItem}
             >
-              <Face hot={hot} />
+              <Face hot={hot} compact={layout.compact} />
             </BoardItem>
           )
         })}
 
-        <Strings hoveredItem={hoveredItem} activeSkill={activeSkill} />
+        <Strings layout={layout} hoveredItem={hoveredItem} activeSkill={activeSkill} />
         <SkillStrip
+          layout={layout}
           activeSkill={activeSkill}
           lockedSkill={lockedSkill}
           onHover={setHoveredSkill}
           onLock={setLockedSkill}
         />
-        <Pins />
+        <Pins layout={layout} />
       </div>
     </m.div>
   )

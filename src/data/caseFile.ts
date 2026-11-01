@@ -64,6 +64,8 @@ export interface Shot {
   caption: string
   width: number
   height: number
+  /** Which part stays in view when the image is cropped, as a CSS object-position. Default: the top. */
+  focus?: string
 }
 
 export interface Fact {
@@ -233,6 +235,7 @@ export const ARCHIVE: ArchiveStory[] = [
       caption: 'A creator page with its supporters.',
       width: 720,
       height: 481,
+      focus: '50% 30%',
     },
   },
   {

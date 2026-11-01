@@ -128,12 +128,12 @@ export function FocusPanel({ active, last, dir, vp, stacked, getItemPlacement, o
             animate={{ opacity: 1, transition: { delay: 0.2, duration: 0.2 } }}
             exit={{ opacity: 0, transition: { duration: 0.08 } }}
           >
-            <header className="flex shrink-0 items-center justify-between gap-3 border-b border-ink/20 bg-[#f7f2e7]/90 px-4 py-3 sm:px-5">
+            <header className="flex shrink-0 items-center justify-between gap-3 border-b border-ink/20 bg-[#f7f2e7]/90 px-4 py-1.5 sm:px-5">
               <div className="flex min-w-0 items-center gap-3">
-                <span id="panel-title" className="dymo text-[13px]">
+                <span id="panel-title" className="dymo text-[12px]">
                   {sectionById(active).label}
                 </span>
-                <span className="hidden font-mono text-[12px] uppercase tracking-[0.2em] text-ink-soft md:inline">
+                <span className="hidden font-mono text-small uppercase tracking-[0.16em] text-ink-soft tab:inline">
                   Evidence {sectionIndex(active) + 1} of {SECTIONS.length}
                 </span>
               </div>
@@ -167,7 +167,15 @@ export function FocusPanel({ active, last, dir, vp, stacked, getItemPlacement, o
                 initial={false}
                 onExitComplete={() => scrollRef.current?.scrollTo({ top: 0 })}
               >
-                <m.div key={active} custom={dir} variants={contentVariants} initial="enter" animate="shown" exit="leave">
+                <m.div
+                  key={active}
+                  custom={dir}
+                  variants={contentVariants}
+                  initial="enter"
+                  animate="shown"
+                  exit="leave"
+                  className="flex min-h-full flex-col"
+                >
                   <Suspense fallback={<p className="px-8 py-10 font-type text-[16px] text-ink-soft">Pulling the file…</p>}>
                     <SectionView id={active} />
                   </Suspense>

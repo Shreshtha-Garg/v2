@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { STAGE } from '../board/layout'
+import { TALL, WIDE } from '../board/layout'
+import type { BoardLayout } from '../board/layout'
 
 export interface Viewport {
   w: number
@@ -7,6 +8,7 @@ export interface Viewport {
 }
 
 export interface Fit {
+  layout: BoardLayout
   scale: number
   left: number
   top: number
@@ -19,10 +21,10 @@ export interface Rect {
   height: number
 }
 
-export const HUD_TOP = 48
-export const HUD_BOTTOM = 76
+export const HUD_TOP = 36
+export const HUD_BOTTOM = 52
 /** Room left around the stage for the wooden frame. */
-const FRAME = 36
+const FRAME = 18
 
 export function useViewport(): Viewport {
   const [vp, setVp] = useState<Viewport>(() => ({ w: window.innerWidth, h: window.innerHeight }))
@@ -34,25 +36,29 @@ export function useViewport(): Viewport {
   return vp
 }
 
-/** Scale the stage to the largest size that fits between the HUD bars. */
-export function fitStage(vp: Viewport): Fit {
-  const availW = vp.w - 2 * (FRAME + 12)
+/** Scale a layout's stage to the largest size that fits between the HUD bars. */
+function fitTo(layout: BoardLayout, vp: Viewport): Fit {
+  const availW = vp.w - 2 * (FRAME + 6)
   const availH = vp.h - HUD_TOP - HUD_BOTTOM - 2 * FRAME
-  const scale = Math.max(0.2, Math.min(availW / STAGE.w, availH / STAGE.h, 1.4))
-  return {
-    scale,
-    left: (vp.w - STAGE.w * scale) / 2,
-    top: HUD_TOP + FRAME + (availH - STAGE.h * scale) / 2,
-  }
+  const { w, h } = layout.stage
+  const scale = Math.max(0.2, Math.min(availW / w, availH / h, 1.4))
+  return { layout, scale, left: (vp.w - w * scale) / 2, top: HUD_TOP + FRAME + (availH - h * scale) / 2 }
 }
 
-/** Below this board scale the text gets too small to read, so phones and narrow windows get the stacked layout. */
-export const isStacked = (fit: Fit) => fit.scale < 0.55
+/** Use whichever board shape fills this window best: wide for PCs and landscape, tall for portrait tablets. */
+export function fitBoard(vp: Viewport): Fit {
+  const wide = fitTo(WIDE, vp)
+  const tall = fitTo(TALL, vp)
+  return tall.scale > wide.scale ? tall : wide
+}
+
+/** Phones, and windows too short for any board to stay readable, get the stacked column. */
+export const isStacked = (vp: Viewport, fit: Fit) => vp.w < 700 || fit.scale < 0.42
 
 /** Where the focused evidence panel sits once it has zoomed in. On phones it is a full-screen sheet. */
 export function panelRect(vp: Viewport, stacked: boolean): Rect {
   if (stacked) return { left: 6, top: 6, width: vp.w - 12, height: vp.h - 12 }
-  const width = Math.min(1120, vp.w - 32)
-  const top = HUD_TOP + 4
-  return { left: (vp.w - width) / 2, top, width, height: vp.h - top - HUD_BOTTOM - 10 }
+  const width = Math.min(1120, vp.w - 16)
+  const top = HUD_TOP + 2
+  return { left: (vp.w - width) / 2, top, width, height: vp.h - top - HUD_BOTTOM - 6 }
 }
