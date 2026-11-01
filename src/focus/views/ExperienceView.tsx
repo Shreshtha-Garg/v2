@@ -3,7 +3,7 @@ import { AnimatePresence, m } from 'motion/react'
 import { useState } from 'react'
 import { EXPERIENCE, JOURNEY } from '../../data/caseFile'
 import type { StopId } from '../../data/caseFile'
-import { JourneyMap } from './JourneyMap'
+import { JourneyMap, JourneyTrail } from './JourneyMap'
 import { Bullets, Stamp } from './shared'
 
 const REPORT_FIELDS = [
@@ -20,15 +20,16 @@ export function ExperienceView() {
   return (
     <div className="px-5 pb-5 pt-4 tab:px-8 lg:px-10">
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div>
-          {/* On phones the map keeps a readable size and scrolls sideways instead of shrinking. */}
-          <div className="-mx-5 overflow-x-auto px-5 [scrollbar-width:thin] tab:mx-0 tab:overflow-visible tab:px-0">
-            <div className="min-w-[700px] tab:min-w-0">
-              <JourneyMap selected={selected} onSelect={setSelected} />
-            </div>
+        <div className="min-w-0">
+          {/* Shrunk to phone width the wide map's labels can't be read, so phones get the same route drawn upright. */}
+          <div className="tab:hidden">
+            <JourneyTrail selected={selected} onSelect={setSelected} />
+          </div>
+          <div className="hidden tab:block">
+            <JourneyMap selected={selected} onSelect={setSelected} />
           </div>
           <p className="mt-1 text-center font-mono text-small uppercase tracking-[0.14em] text-ink-soft">
-            <span className="tab:hidden">Swipe the map · tap a stop</span>
+            <span className="tab:hidden">Tap a stop on the map</span>
             <span className="hidden tab:inline">Hover or select a stop on the map</span>
           </p>
         </div>
@@ -52,7 +53,9 @@ export function ExperienceView() {
       </div>
 
       <article className="typed-sheet relative mt-5 p-4 lg:p-5">
-        <p className="typed-label">Field report · {EXPERIENCE.company}</p>
+        <p className="typed-label">
+          Field report<span className="hidden tab:inline"> · {EXPERIENCE.company}</span>
+        </p>
         <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 font-type text-[14px] tab:grid-cols-4">
           {REPORT_FIELDS.map((f) => (
             <div key={f.label}>

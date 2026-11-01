@@ -14,27 +14,31 @@ export function AchievementsView() {
 
       <h2 className="news-headline mt-3 text-headline">Local dev promoted to Expert</h2>
       <p className="news-deck mt-1 max-w-3xl">
-        A 1640 rating on Codeforces makes it official, alongside a 2067 Knight rating on LeetCode and 4 stars on CodeChef.
+        <span className="hidden tab:inline">
+          A 1640 rating on Codeforces makes it official, alongside a 2067 Knight rating on LeetCode and 4 stars on CodeChef.{' '}
+        </span>
         More than 1600 problems solved on LeetCode and Codeforces alone.
       </p>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-3 gap-1.5 tab:gap-3">
         {RATINGS.map((r, i) => (
           <a
             key={r.site}
             href={r.href}
             target="_blank"
             rel="noreferrer"
-            className="evidence-card group relative"
+            className="evidence-card group relative !px-2 !py-1.5 tab:!px-[0.9rem] tab:!py-[0.7rem]"
             style={{ rotate: `${CARD_TILT[i]}deg` }}
           >
-            <span className="absolute right-2.5 top-1.5 font-mono text-small text-ink-soft group-hover:text-ink" aria-hidden="true">
+            <span className="absolute right-1.5 top-1 font-mono text-small text-ink-soft group-hover:text-ink tab:right-2.5 tab:top-1.5" aria-hidden="true">
               ↗
             </span>
-            <p className="font-mono text-small font-bold uppercase tracking-[0.16em] text-ink-soft">{r.site}</p>
+            <p className="font-mono text-[11px] font-bold uppercase text-ink-soft tab:text-small tab:tracking-[0.16em]">{r.site}</p>
             <p className="mt-0.5 font-serif text-number font-black leading-none text-ink">{r.rating}</p>
-            <p className="mt-1 text-[13px] leading-snug text-ink-soft">
-              <span className="font-type text-[15px] text-[#8c1c1c]">{r.title}</span> · {r.detail}
+            <p className="mt-1 text-[12px] leading-tight text-ink-soft tab:text-[13px] tab:leading-snug">
+              <span className="block font-type text-[14px] text-[#8c1c1c] tab:inline tab:text-[15px]">{r.title}</span>
+              <span className="hidden tab:inline"> · </span>
+              {r.detail}
             </p>
           </a>
         ))}
@@ -65,12 +69,12 @@ export function AchievementsView() {
 
         <section>
           <h3 className="section-label">Also in the papers</h3>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-3 grid grid-cols-2 gap-2 tab:gap-3 lg:grid-cols-3">
             {CLIPPINGS.map((c, i) => (
               // One clipping runs across two columns, so five clippings don't leave a hole in the grid.
               <article
                 key={c.headline}
-                className={`clipping${i === 0 ? ' sm:max-lg:col-span-2' : i === 1 ? ' lg:col-span-2' : ''}`}
+                className={`clipping${i === 0 ? ' max-lg:col-span-2' : i === 1 ? ' lg:col-span-2' : ''}`}
                 style={{ rotate: `${CLIP_TILT[i % CLIP_TILT.length]}deg` }}
               >
                 <p className="font-mono text-small uppercase tracking-[0.08em] text-ink-soft">{c.when}</p>

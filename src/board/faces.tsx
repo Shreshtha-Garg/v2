@@ -14,7 +14,7 @@ export interface FaceProps {
   compact?: boolean
 }
 
-const lit = (on: boolean) => (on ? ' hot-target' : '')
+export const lit = (on: boolean) => (on ? ' hot-target' : '')
 
 function Dymo({ children, tilt = -2 }: { children: string; tilt?: number }) {
   return (

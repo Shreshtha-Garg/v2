@@ -92,7 +92,11 @@ export function Pins({ layout }: { layout: BoardLayout }) {
   return (
     <>
       {unique.map((p) => (
-        <span key={`${p.x},${p.y}`} className="pin" style={{ left: p.x, top: p.y }} />
+        <span
+          key={`${p.x},${p.y}`}
+          className="pin"
+          style={{ left: p.x, top: p.y, width: layout.pin, height: layout.pin, margin: -layout.pin / 2 }}
+        />
       ))}
     </>
   )

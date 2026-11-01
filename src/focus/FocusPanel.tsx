@@ -73,29 +73,30 @@ interface Props {
   dir: number
   vp: Viewport
   /** Phone layout: the panel becomes a full-screen sheet. */
-  stacked: boolean
-  getItemPlacement: (id: SectionId) => ItemPlacement | null
+  phone: boolean
+  getItemPlacement: (id: SectionId) => ItemPlacement
   onClose: () => void
   onStep: (step: number) => void
 }
 
-export function FocusPanel({ active, last, dir, vp, stacked, getItemPlacement, onClose, onStep }: Props) {
-  const rect = panelRect(vp, stacked)
+export function FocusPanel({ active, last, dir, vp, phone, getItemPlacement, onClose, onStep }: Props) {
+  const rect = panelRect(vp, phone)
+  const panelRef = useRef<HTMLElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const isOpen = active !== null
 
+  // Keyboards land on the close button. Touch screens have no use for that, and would show its focus ring.
   useEffect(() => {
-    if (isOpen) closeRef.current?.focus({ preventScroll: true })
+    if (!isOpen) return
+    const target = window.matchMedia('(hover: hover)').matches ? closeRef.current : panelRef.current
+    target?.focus({ preventScroll: true })
   }, [isOpen])
 
   // The transform that lays the open panel exactly over a board item, so opening reads as picking it up.
-  // If the item is off screen (a phone scrolled elsewhere), the panel grows from the middle instead.
   const flipTo = (id: SectionId | null): Flip => {
     if (!id) return { x: 0, y: 0, sx: 1, sy: 1, rot: 0 }
-    const placement = getItemPlacement(id)
-    if (!placement) return { x: rect.width * 0.1, y: rect.height * 0.12, sx: 0.8, sy: 0.76, rot: 0 }
-    const { rect: r, rot } = placement
+    const { rect: r, rot } = getItemPlacement(id)
     return {
       x: r.left - rect.left,
       y: r.top - rect.top,
@@ -110,10 +111,12 @@ export function FocusPanel({ active, last, dir, vp, stacked, getItemPlacement, o
       {active && (
         <m.section
           key="panel"
+          ref={panelRef}
           role="dialog"
+          tabIndex={-1}
           aria-modal="true"
           aria-labelledby="panel-title"
-          className={`${SKIN[active]} fixed ${stacked ? 'z-[55]' : 'z-40'} overflow-hidden rounded-[3px] shadow-panel`}
+          className={`${SKIN[active]} fixed ${phone ? 'z-[55]' : 'z-40'} overflow-hidden rounded-[3px] shadow-panel outline-none`}
           style={{ left: rect.left, top: rect.top, width: rect.width, height: rect.height, transformOrigin: '0 0' }}
           custom={flipTo(active)}
           variants={panelVariants}

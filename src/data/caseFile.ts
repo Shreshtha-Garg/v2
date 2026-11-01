@@ -381,14 +381,16 @@ export const RAG = {
 export interface Skill {
   id: string
   label: string
+  /** The label on the phone board, where the notes are small. */
+  short: string
   targets: Anchor[]
 }
 
 /** The sticky notes along the top of the board, and the evidence each one connects to. */
 export const SKILLS: Skill[] = [
-  { id: 'cpp', label: 'C++ & algorithms', targets: ['achievements', 'research.trojan', 'projects.clickon'] },
-  { id: 'node', label: 'Node.js & Express', targets: ['projects.clickon', 'projects.hostelmate', 'experience'] },
-  { id: 'react', label: 'React & Next.js', targets: ['projects.hostelmate', 'projects.archive', 'experience'] },
-  { id: 'data', label: 'MongoDB & Redis', targets: ['projects.clickon', 'projects.hostelmate'] },
-  { id: 'ai', label: 'GenAI & RAG', targets: ['projects.clickon', 'research.rag'] },
+  { id: 'cpp', label: 'C++ & algorithms', short: 'C++', targets: ['achievements', 'research.trojan', 'projects.clickon'] },
+  { id: 'node', label: 'Node.js & Express', short: 'Node.js', targets: ['projects.clickon', 'projects.hostelmate', 'experience'] },
+  { id: 'react', label: 'React & Next.js', short: 'React', targets: ['projects.hostelmate', 'projects.archive', 'experience'] },
+  { id: 'data', label: 'MongoDB & Redis', short: 'MongoDB', targets: ['projects.clickon', 'projects.hostelmate'] },
+  { id: 'ai', label: 'GenAI & RAG', short: 'GenAI', targets: ['projects.clickon', 'research.rag'] },
 ]

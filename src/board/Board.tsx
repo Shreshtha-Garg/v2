@@ -5,6 +5,7 @@ import type { Anchor, SectionId } from '../data/caseFile'
 import type { Fit } from '../lib/useViewport'
 import { BoardItem } from './BoardItem'
 import { faceFor } from './faces'
+import { phoneFaceFor } from './phoneFaces'
 import { SkillStrip } from './SkillStrip'
 import { Pins, Strings } from './Strings'
 
@@ -21,6 +22,8 @@ export function Board({ fit, active, examined, onOpen }: Props) {
   const [lockedSkill, setLockedSkill] = useState<string | null>(null)
   const activeSkill = hoveredSkill ?? lockedSkill
   const { layout } = fit
+  const phone = layout.name === 'phone'
+  const faces = phone ? phoneFaceFor : faceFor
 
   const hot = useMemo(
     () => new Set<Anchor>(SKILLS.find((s) => s.id === activeSkill)?.targets ?? []),
@@ -50,17 +53,18 @@ export function Board({ fit, active, examined, onOpen }: Props) {
           transformOrigin: '0 0',
         }}
       >
-        <div className="board-frame absolute" style={{ inset: -16 }} aria-hidden="true" />
+        <div className="board-frame absolute" style={{ inset: -layout.frame }} aria-hidden="true" />
         <div className="cork absolute inset-0" aria-hidden="true" />
 
         {SECTIONS.map((s) => {
-          const Face = faceFor[s.id]
+          const Face = faces[s.id]
           return (
             <BoardItem
               key={s.id}
               id={s.id}
               label={s.label}
               box={layout.items[s.id]}
+              phone={phone}
               lifted={active === s.id}
               dimmed={activeSkill !== null && !hotSections.has(s.id)}
               examined={examined.has(s.id)}

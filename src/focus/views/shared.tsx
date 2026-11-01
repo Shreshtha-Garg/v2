@@ -128,7 +128,8 @@ export function Photo({ shot, more = [], aspect, className = '', showCaption = t
           </span>
         )}
       </button>
-      {showCaption && <figcaption className="caption mt-1.5">{shot.caption}</figcaption>}
+      {/* On phones the caption waits for the enlarged view, which always shows it. */}
+      {showCaption && <figcaption className="caption mt-1.5 hidden tab:block">{shot.caption}</figcaption>}
       <Lightbox shots={[shot, ...more]} open={open} onClose={close} />
     </figure>
   )

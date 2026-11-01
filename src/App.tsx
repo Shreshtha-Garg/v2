@@ -1,7 +1,6 @@
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Board } from './board/Board'
-import { StackedBoard } from './board/StackedBoard'
 import { SECTIONS, neighbour, sectionById, sectionFromPath, sectionIndex } from './data/caseFile'
 import type { SectionId } from './data/caseFile'
 import { FocusPanel, preloadViews } from './focus/FocusPanel'
@@ -11,7 +10,7 @@ import { BottomHud, TopHud } from './hud/Hud'
 import { Intro, markIntroSeen, shouldPlayIntro } from './intro/Intro'
 import { navigate, usePathname } from './lib/router'
 import { useExamined } from './lib/useExamined'
-import { fitBoard, isStacked, useViewport } from './lib/useViewport'
+import { fitBoard, useViewport } from './lib/useViewport'
 
 const HOME_TITLE = 'Shreshtha Garg · Full Stack Developer'
 
@@ -20,7 +19,7 @@ export default function App() {
   const active = sectionFromPath(pathname)
   const vp = useViewport()
   const fit = fitBoard(vp)
-  const stacked = isStacked(vp, fit)
+  const phone = fit.layout.name === 'phone'
   const examined = useExamined(active)
 
   const [intro, setIntro] = useState(() => shouldPlayIntro(pathname))
@@ -52,18 +51,10 @@ export default function App() {
     navigate(neighbour(active, d).path)
   }
 
-  // On the board the geometry is known exactly; in the stacked layout the item is measured where it sits.
-  const getItemPlacement = (id: SectionId): ItemPlacement | null => {
-    if (!stacked) {
-      const b = fit.layout.items[id]
-      const rect = { left: fit.left + b.x * fit.scale, top: fit.top + b.y * fit.scale, width: b.w * fit.scale, height: b.h * fit.scale }
-      return { rect, rot: b.rot }
-    }
-    const el = document.querySelector<HTMLElement>(`[data-item="${id}"]`)
-    if (!el) return null
-    const r = el.getBoundingClientRect()
-    if (r.bottom < 0 || r.top > window.innerHeight) return null
-    return { rect: { left: r.left, top: r.top, width: r.width, height: r.height }, rot: 0 }
+  const getItemPlacement = (id: SectionId): ItemPlacement => {
+    const b = fit.layout.items[id]
+    const rect = { left: fit.left + b.x * fit.scale, top: fit.top + b.y * fit.scale, width: b.w * fit.scale, height: b.h * fit.scale }
+    return { rect, rot: b.rot }
   }
 
   useEffect(() => {
@@ -120,14 +111,8 @@ export default function App() {
     <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">
         <div className="room fixed inset-0 overflow-hidden">
-          {stacked ? (
-            <StackedBoard vp={vp} active={active} examined={examined} onOpen={open} />
-          ) : (
-            <>
-              <Board fit={fit} active={active} examined={examined} onOpen={open} />
-              <div className="lamp pointer-events-none fixed inset-0 z-10" aria-hidden="true" />
-            </>
-          )}
+          <Board fit={fit} active={active} examined={examined} onOpen={open} />
+          <div className="lamp pointer-events-none fixed inset-0 z-10" aria-hidden="true" />
           <AnimatePresence>
             {active && (
               <m.div
@@ -147,14 +132,14 @@ export default function App() {
             last={last.current}
             dir={dir.current}
             vp={vp}
-            stacked={stacked}
+            phone={phone}
             getItemPlacement={getItemPlacement}
             onClose={close}
             onStep={step}
           />
-          <TopHud examined={examined} compact={stacked} />
-          {!stacked && <BottomHud active={active} />}
-          <HintToast ready={!intro} dismissed={active !== null} touch={stacked || fit.layout.compact} aboveHud={!stacked} />
+          <TopHud examined={examined} compact={phone} />
+          {!phone && <BottomHud active={active} />}
+          <HintToast ready={!intro} dismissed={active !== null} touch={fit.layout.compact} aboveHud={!phone} />
           <AnimatePresence>{intro && <Intro key="intro" onDone={endIntro} />}</AnimatePresence>
         </div>
       </MotionConfig>

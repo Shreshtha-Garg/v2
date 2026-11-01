@@ -223,7 +223,10 @@ export function ContactView() {
               Goes straight to my inbox
             </p>
           </div>
-          <p className="mt-2 font-hand text-[22px] leading-tight text-[#1f3f8a]">Got a lead, a role or a question? Write it here.</p>
+          <p className="mt-2 font-hand text-[22px] leading-tight text-[#1f3f8a]">
+            <span className="tab:hidden">Got a lead? Write it here.</span>
+            <span className="hidden tab:inline">Got a lead, a role or a question? Write it here.</span>
+          </p>
           <div className="mt-2.5">
             <TipForm />
           </div>
@@ -231,13 +234,13 @@ export function ContactView() {
       </section>
 
       <aside className="relative mx-auto w-full max-w-[420px] tab:mt-2">
-        <div className="paper-card relative rotate-[1deg] pb-4 pl-[50px] pr-4 pt-7 shadow-paper">
+        <div className="paper-card relative rotate-[1deg] pb-3 pl-[48px] pr-3 pt-6 shadow-paper tab:pb-4 tab:pl-[50px] tab:pr-4 tab:pt-7">
           <span className="pin" style={{ left: '50%', top: 12 }} aria-hidden="true" />
           <p className="typed-label">Or reach me directly</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <a
               href={`mailto:${PROFILE.email}`}
-              className="font-mono text-[13px] font-bold text-ink underline decoration-[#1f3f8a] decoration-2 underline-offset-4"
+              className="py-2 font-mono text-[13px] font-bold text-ink underline decoration-[#1f3f8a] decoration-2 underline-offset-4 tab:py-0"
             >
               {PROFILE.email}
             </a>
@@ -245,7 +248,18 @@ export function ContactView() {
               {copied ? 'Copied' : 'Copy'}
             </button>
           </div>
-          <ul className="mt-3 divide-y divide-ink/15 border-y border-ink/15">
+          {/* Phones get the channels as a block of buttons: the handles don't help there, and the form needs the room. */}
+          <div className="mt-2 grid grid-cols-2 gap-1.5 min-[360px]:grid-cols-3 tab:hidden">
+            {CHANNELS.map((c) => (
+              <a key={c.label} href={c.href} target="_blank" rel="noreferrer" className="ink-btn justify-center !px-1 !tracking-normal">
+                {c.label}
+              </a>
+            ))}
+            <a href={PROFILE.resume} target="_blank" rel="noreferrer" className="ink-btn ink-btn-solid justify-center !px-1 !tracking-normal">
+              Resume
+            </a>
+          </div>
+          <ul className="mt-3 hidden divide-y divide-ink/15 border-y border-ink/15 tab:block">
             {CHANNELS.map((c) => (
               <li key={c.label}>
                 <a
@@ -260,7 +274,7 @@ export function ContactView() {
               </li>
             ))}
           </ul>
-          <a href={PROFILE.resume} target="_blank" rel="noreferrer" className="ink-btn mt-3">
+          <a href={PROFILE.resume} target="_blank" rel="noreferrer" className="ink-btn mt-3 hidden tab:inline-flex">
             Resume PDF ↗
           </a>
         </div>

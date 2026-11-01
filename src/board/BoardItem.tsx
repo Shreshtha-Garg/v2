@@ -7,6 +7,8 @@ interface Props {
   id: SectionId
   label: string
   box: Box
+  /** The phone cards have no room for the full stamp, so they get a small seal. */
+  phone: boolean
   /** True while this item is "picked up" into the focus panel. */
   lifted: boolean
   dimmed: boolean
@@ -16,7 +18,7 @@ interface Props {
   children: ReactNode
 }
 
-export function BoardItem({ id, label, box, lifted, dimmed, examined, onOpen, onHover, children }: Props) {
+export function BoardItem({ id, label, box, phone, lifted, dimmed, examined, onOpen, onHover, children }: Props) {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -55,7 +57,15 @@ export function BoardItem({ id, label, box, lifted, dimmed, examined, onOpen, on
       {/* Dimming uses opacity, not a CSS filter: a filter makes the browser rasterise the item and then
           scale it with the board, which blurs the text. */}
       <div className={`h-full w-full transition-opacity duration-200${dimmed ? ' opacity-45' : ''}`}>{children}</div>
-      {examined && (
+      {examined && phone && (
+        <span
+          className="pointer-events-none absolute -right-1 -top-1.5 z-10 grid h-[18px] w-[18px] place-items-center rounded-full bg-[#b0141b] text-[11px] font-bold text-white shadow-paper"
+          aria-label="Examined"
+        >
+          ✓
+        </span>
+      )}
+      {examined && !phone && (
         <span
           className="stamp stamp-sticker pointer-events-none absolute -right-2 -top-3 z-10 rotate-[12deg] text-[15px]"
           // Research's top-right corner is bare cork, so its stamp goes on the front folder (204px tall) instead.

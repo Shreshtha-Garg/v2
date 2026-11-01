@@ -254,12 +254,107 @@ export function JourneyMap({ selected, onSelect }: Props) {
   )
 }
 
+/** How far down to shift each icon, as drawn above its stop, to centre it on a row of the upright map. */
+const ICON_DROP: Partial<Record<StopId, number>> = { jee: 27, iiitm: 24, firstbench: 27, hackon: 24 }
+
+const ROW = 54
+const ROW_TOP = 66
+const ROUTE_X = [40, 72, 36, 74, 42]
+
+/** The phone version of the map: the same route running top to bottom, with every label beside its stop. */
+export function JourneyTrail({ selected, onSelect }: Props) {
+  const stops = JOURNEY.map((stop, i) => ({ stop, x: ROUTE_X[i], y: ROW_TOP + i * ROW }))
+  const height = ROW_TOP + JOURNEY.length * ROW - 4
+
+  const onKey = (id: StopId) => (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onSelect(id)
+    }
+  }
+
+  return (
+    <svg viewBox={`0 0 350 ${height}`} className="block h-auto w-full" role="group" aria-label="Map of the journey so far">
+      <rect x="3" y="3" width="344" height={height - 6} fill="none" stroke={INK} strokeWidth="2.2" />
+      <rect x="8" y="8" width="334" height={height - 16} fill="none" stroke={INK} strokeWidth="0.8" opacity="0.6" />
+      <path d="M8 8 H96 C 88 28, 58 34, 36 38 C 22 40, 14 44, 8 48 Z" fill="#a9bcb6" fillOpacity="0.55" stroke="#5f7f86" strokeWidth="1.2" />
+
+      <Label x={175} y={36} size={21} color={INK}>
+        The Road So Far
+      </Label>
+      <g transform="translate(316 34) scale(0.56)" stroke={INK} strokeWidth="1.8">
+        <circle r="28" fill="none" opacity="0.6" />
+        <path d="M0 -34 L6 0 L0 34 L-6 0 Z" fill="#cdb68a" />
+        <path d="M0 -34 L6 0 L-6 0 Z" fill={RED} />
+        <path d="M-34 0 L0 5 L34 0 L0 -5 Z" fill="#f1e4c6" />
+      </g>
+      <g stroke={INK} strokeWidth="1.2" strokeLinejoin="round">
+        {[[306, 108, 34], [326, 112, 26]].map(([x, y, h]) => (
+          <g key={x}>
+            <path d={`M ${x - h / 2} ${y} L ${x} ${y - h * 0.9} L ${x + h / 2} ${y} Z`} fill="#cdb68a" />
+            <path d={`M ${x - h * 0.16} ${y - h * 0.58} L ${x} ${y - h * 0.9} L ${x + h * 0.16} ${y - h * 0.58} Z`} fill="#f7efdc" />
+          </g>
+        ))}
+      </g>
+      <g stroke={INK} strokeWidth="0.8">
+        {[[300, height - 44], [320, height - 52], [326, height - 30], [304, height - 24]].map(([x, y]) => (
+          <g key={`${x}-${y}`} transform={`translate(${x} ${y})`}>
+            <path d="M0 -12 L-8 3 H8 Z" fill="#7d8a55" />
+            <path d="M0 -5 L-9 10 H9 Z" fill="#6d7a48" />
+          </g>
+        ))}
+      </g>
+
+      <path d={smoothPath(stops)} fill="none" stroke={RED} strokeWidth="3.4" strokeDasharray="2 9" strokeLinecap="round" />
+
+      {stops.map(({ stop, x, y }) => {
+        const on = selected === stop.id
+        return (
+          <g
+            key={stop.id}
+            role="button"
+            tabIndex={0}
+            aria-pressed={on}
+            aria-label={`${stop.title}, ${stop.when}`}
+            className="cursor-pointer outline-none [&:focus-visible_.stop-ring]:stroke-[#f0b44a]"
+            onClick={() => onSelect(stop.id)}
+            onKeyDown={onKey(stop.id)}
+          >
+            <rect x="8" y={y - ROW / 2} width="334" height={ROW} fill={on ? RED : 'transparent'} fillOpacity={on ? 0.08 : 0} />
+            {stop.id === 'next' ? (
+              <g transform={`translate(${x} ${y})`}>
+                <Icon id="next" />
+              </g>
+            ) : (
+              <>
+                <circle className="stop-ring" cx={x} cy={y} r="7" fill={on ? RED : '#f6eedb'} stroke={RED} strokeWidth="3" />
+                <g transform={`translate(112 ${y + (ICON_DROP[stop.id] ?? 0) * 0.72}) scale(0.72)`}>
+                  <Icon id={stop.id} />
+                </g>
+              </>
+            )}
+            <Label x={136} y={stop.years ? y - 1 : y + 6} size={on ? 19 : 18} color={on ? RED : INK} anchor="start">
+              {stop.id === 'iiitm' ? 'IIITM Gwalior' : stop.title}
+            </Label>
+            {stop.years && (
+              <text x={136} y={y + 16} fill={on ? RED : '#6b4a24'} fontSize="13.5" style={{ fontFamily: 'var(--font-type)', letterSpacing: '0.05em' }}>
+                {stop.years}
+              </text>
+            )}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 function Label({
   x,
   y,
   size,
   color,
   rotate = 0,
+  anchor = 'middle',
   children,
 }: {
   x: number
@@ -267,6 +362,7 @@ function Label({
   size: number
   color: string
   rotate?: number
+  anchor?: 'start' | 'middle'
   children: ReactNode
 }) {
   return (
@@ -275,7 +371,7 @@ function Label({
       y={y}
       fill={color}
       fontSize={size}
-      textAnchor="middle"
+      textAnchor={anchor}
       transform={rotate ? `rotate(${rotate} ${x} ${y})` : undefined}
       style={{ fontFamily: 'var(--font-map)' }}
     >

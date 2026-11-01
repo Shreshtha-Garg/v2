@@ -1,4 +1,5 @@
 // Projects as the front page of "The Daily Build": lead story, second story, and classifieds for older work.
+import { useState } from 'react'
 import { ARCHIVE, STORIES } from '../../data/caseFile'
 import type { NewsStory } from '../../data/caseFile'
 import { Chips, FactBox, Links, Photo } from './shared'
@@ -11,8 +12,10 @@ function Masthead() {
         <h2 className="font-serif text-masthead font-black leading-none tracking-tight text-ink">The Daily Build</h2>
         <p className="ear hidden justify-self-end lg:block">Late edition · free for recruiters</p>
       </div>
-      <div className="mt-2 flex flex-wrap justify-between gap-x-3 border-y-2 border-ink py-0.5 font-mono text-small uppercase tracking-[0.14em] text-ink">
-        <span>Vol. III · Projects edition</span>
+      <div className="mt-2 flex flex-wrap justify-between gap-x-3 border-y-2 border-ink py-0.5 font-mono text-small uppercase tracking-[0.04em] text-ink tab:tracking-[0.14em]">
+        <span>
+          <span className="hidden tab:inline">Vol. III · </span>Projects edition
+        </span>
         <span className="hidden tab:inline">Gwalior, India</span>
         <span>Price: one interview</span>
       </div>
@@ -22,6 +25,8 @@ function Masthead() {
 
 function Story({ story, lead = false }: { story: NewsStory; lead?: boolean }) {
   const [main, ...more] = story.images
+  // Phones start with the first paragraph; tablets and PCs always show the whole story.
+  const [expanded, setExpanded] = useState(false)
   return (
     <article>
       <p className="kicker">{story.kicker}</p>
@@ -30,10 +35,18 @@ function Story({ story, lead = false }: { story: NewsStory; lead?: boolean }) {
       <div className={`story-grid mt-3${lead ? '' : ' is-flipped'}`}>
         <div className="story-body news-body">
           {story.body.map((p, i) => (
-            <p key={p} className={i === 0 ? 'drop-cap' : undefined}>
+            <p key={p} className={i === 0 ? 'drop-cap' : expanded ? undefined : 'hidden tab:block'}>
               {p}
             </p>
           ))}
+          <button
+            type="button"
+            className="ink-btn mt-2 tab:hidden"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((e) => !e)}
+          >
+            {expanded ? 'Show less' : 'Read full story'}
+          </button>
         </div>
         <aside className="story-aside space-y-2.5">
           <Photo shot={main} more={more} aspect="16/9" />

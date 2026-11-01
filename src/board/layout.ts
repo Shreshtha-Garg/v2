@@ -21,16 +21,20 @@ export interface CoreString {
 
 /** One arrangement of the board, drawn on a fixed stage that is scaled to fit the window, like a game canvas. */
 export interface BoardLayout {
-  name: 'wide' | 'tall'
+  name: 'wide' | 'tall' | 'phone'
   stage: { w: number; h: number }
   /** Tall boards use the shorter versions of the pinned items. */
   compact: boolean
+  /** Width of the wooden frame around the stage, and the size of the pins. */
+  frame: number
+  pin: number
   items: Record<SectionId, Box>
   /** Where each pin sits, kept near item edges so strings cross cork, not text. */
   anchors: Record<Anchor, Point>
   /** Red string joining the evidence to the subject's dossier. */
   strings: CoreString[]
-  note: { w: number; h: number; y: number; gap: number; font: number }
+  /** `x` puts the notes in a column at that position instead of a row across the top. */
+  note: { w: number; h: number; y: number; gap: number; font: number; x?: number }
 }
 
 const at = (b: Box, dx: number, dy: number): Point => ({ x: b.x + dx, y: b.y + dy })
@@ -61,6 +65,8 @@ export const WIDE: BoardLayout = {
   name: 'wide',
   stage: { w: 1440, h: 780 },
   compact: false,
+  frame: 16,
+  pin: 20,
   items: WIDE_ITEMS,
   anchors: WIDE_ANCHORS,
   strings: [
@@ -99,6 +105,8 @@ export const TALL: BoardLayout = {
   name: 'tall',
   stage: { w: 1000, h: 1240 },
   compact: true,
+  frame: 16,
+  pin: 20,
   items: TALL_ITEMS,
   anchors: TALL_ANCHORS,
   // The strings run through the gutters between items, so none of them crosses any text.
@@ -112,10 +120,94 @@ export const TALL: BoardLayout = {
   note: { w: 150, h: 74, y: 10, gap: 20, font: 26 },
 }
 
+/**
+ * The phone board, drawn at phone size for the room the screen gives it: two columns and three rows
+ * upright, three columns and two rows held sideways with the sticky notes down the left.
+ */
+export function phoneLayout(w: number, h: number, sideways: boolean): BoardLayout {
+  const side = 8
+  const gapX = 14
+  const gapY = 18
+  const noteW = 68
+  const left = sideways ? side + noteW + 12 : side
+  const top = sideways ? 12 : 62
+  const cols = sideways ? 3 : 2
+  const rows = sideways ? 2 : 3
+  const colW = (w - left - side - gapX * (cols - 1)) / cols
+  const rowH = (h - top - 8 - gapY * (rows - 1)) / rows
+
+  const order: SectionId[] = ['about', 'projects', 'experience', 'achievements', 'research', 'contact']
+  const tilt = [-0.6, 0.7, 0.5, -0.5, -0.4, 0.6]
+  const items = Object.fromEntries(
+    order.map((id, i) => [
+      id,
+      {
+        x: left + (i % cols) * (colW + gapX),
+        y: top + Math.floor(i / cols) * (rowH + gapY),
+        w: colW,
+        h: rowH,
+        rot: tilt[i],
+      },
+    ]),
+  ) as Record<SectionId, Box>
+
+  const drop = colW * 0.75
+  const across = Math.min(40, rowH * 0.28)
+  const down = (a: SectionId, b: SectionId, section: SectionId): CoreString => ({
+    section,
+    from: at(items[a], drop, rowH - 3),
+    to: at(items[b], drop, 3),
+  })
+  const beside = (a: SectionId, b: SectionId, section: SectionId): CoreString => ({
+    section,
+    from: at(items[a], colW - 5, across),
+    to: at(items[b], -1, across),
+  })
+
+  return {
+    name: 'phone',
+    stage: { w, h },
+    compact: true,
+    frame: 7,
+    pin: 12,
+    items,
+    anchors: {
+      about: at(items.about, colW / 2, 3),
+      'projects.clickon': at(items.projects, -1, across),
+      'projects.hostelmate': at(items.projects, -1, rowH * 0.6),
+      'projects.archive': at(items.projects, -1, rowH - 10),
+      experience: at(items.experience, -1, rowH * 0.45),
+      achievements: at(items.achievements, drop, 3),
+      'research.rag': at(items.research, -1, rowH * 0.3),
+      'research.trojan': at(items.research, colW * 0.06 - 1, rowH * 0.72),
+      contact: at(items.contact, drop, 3),
+    },
+    strings: sideways
+      ? [
+          beside('about', 'projects', 'projects'),
+          beside('projects', 'experience', 'experience'),
+          down('about', 'achievements', 'achievements'),
+          down('projects', 'research', 'research'),
+          down('experience', 'contact', 'contact'),
+        ]
+      : [
+          beside('about', 'projects', 'projects'),
+          down('about', 'experience', 'experience'),
+          down('projects', 'achievements', 'achievements'),
+          down('experience', 'research', 'research'),
+          down('achievements', 'contact', 'contact'),
+        ],
+    note: sideways
+      ? { w: noteW, h: (h - 16 - 4 * 6) / 5, y: 8, gap: 6, font: 18, x: side }
+      : { w: (w - 16 - 4 * 5) / 5, h: 42, y: 6, gap: 5, font: 18 },
+  }
+}
+
 const NOTE_TILT = [-3, 2, -1.5, 3, -2]
 
 export function notePos(layout: BoardLayout, i: number): Box {
-  const { w, h, y, gap } = layout.note
+  const { w, h, y, gap, x } = layout.note
+  if (x !== undefined) return { x, y: y + i * (h + gap), w, h, rot: NOTE_TILT[i % NOTE_TILT.length] }
   const total = SKILLS.length * w + (SKILLS.length - 1) * gap
   const x0 = (layout.stage.w - total) / 2
   return { x: x0 + i * (w + gap), y, w, h, rot: NOTE_TILT[i % NOTE_TILT.length] }
@@ -124,7 +216,7 @@ export function notePos(layout: BoardLayout, i: number): Box {
 /** The pin at the bottom of a sticky note, where its skill strings start. */
 export function noteOrigin(layout: BoardLayout, i: number): Point {
   const b = notePos(layout, i)
-  return { x: b.x + b.w / 2, y: b.y + b.h - 9 }
+  return { x: b.x + b.w / 2, y: b.y + b.h - layout.pin / 2 + 1 }
 }
 
 /** A string between two pins that sags under gravity, or pulls nearly straight when highlighted. */

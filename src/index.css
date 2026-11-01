@@ -40,6 +40,10 @@
   --text-small: 12px;
 }
 
+/* Heights of a phone board card, which show a little more detail when the screen has room for it. */
+@custom-variant midcard (@container (min-height: 165px));
+@custom-variant tallcard (@container (min-height: 186px));
+
 /* Procedural textures (SVG noise), so the board needs no image assets. */
 :root {
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .26 0 0 0 0 .18 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
@@ -58,6 +62,17 @@
       --text-subhead: 22px;
       --text-title: 18px;
       --text-deck: 15px;
+    }
+  }
+
+  @media (max-width: 699.98px) {
+    :root {
+      --text-masthead: 28px;
+      --text-name: 28px;
+      --text-number: 26px;
+      --text-headline: 26px;
+      --text-subhead: 20px;
+      --text-title: 17px;
     }
   }
 
@@ -887,6 +902,39 @@
     background-size: 4px 4px;
     mix-blend-mode: multiply;
     pointer-events: none;
+  }
+
+  /* Phones and phones held sideways: controls big enough for a thumb. */
+  @media (max-width: 699.98px), (max-height: 479.98px) {
+    .panel-btn,
+    .hud-link {
+      justify-content: center;
+      min-width: 40px;
+      min-height: 40px;
+    }
+
+    .ink-btn {
+      min-height: 40px;
+    }
+
+    .folder-tab {
+      height: 40px;
+      padding: 0 0.6rem;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  @media (max-width: 699.98px) {
+    .box-scores td {
+      padding: 0.2rem 0;
+    }
+  }
+
+  /* iPhones zoom the page in when a field with text under 16px is tapped. */
+  @media (max-width: 699.98px), (pointer: coarse) {
+    .tip-input {
+      font-size: 16px;
+    }
   }
 }
 

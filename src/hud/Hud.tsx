@@ -7,7 +7,7 @@ export function TopHud({ examined, compact }: { examined: ReadonlySet<SectionId>
   const done = examined.size === SECTIONS.length
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between px-4 font-mono text-[11px] uppercase tracking-[0.18em] text-wall sm:px-5 ${compact ? 'h-12 border-b border-white/10 bg-[#0e0c0a]' : 'h-9'}`}
+      className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between px-4 font-mono text-[11px] uppercase tracking-[0.18em] text-wall sm:px-5 ${compact ? 'h-11 border-b border-white/10 bg-[#0e0c0a]' : 'h-9'}`}
     >
       <span>{compact ? `Case ${PROFILE.caseNo}` : `Case file ${PROFILE.caseNo} · ${PROFILE.name}`}</span>
       <span className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export function TopHud({ examined, compact }: { examined: ReadonlySet<SectionId>
             href={PROFILE.resume}
             target="_blank"
             rel="noreferrer"
-            className="pointer-events-auto rounded bg-amber px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-[#1a1206]"
+            className="pointer-events-auto flex h-8 items-center rounded bg-amber px-3 text-[12px] font-bold tracking-[0.08em] text-[#1a1206]"
           >
             Resume
           </a>
